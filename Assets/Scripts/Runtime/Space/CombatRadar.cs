@@ -52,8 +52,12 @@
 //               readout is white (a capture is green).
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using GoF2Remake.Data;
 using GoF2Remake.World;
+using NUnit.Framework;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace GoF2Remake.Flight
@@ -402,8 +406,22 @@ namespace GoF2Remake.Flight
             if (ship == null) return;
             var cargo = ship.CargoList;
             if (cargo == null || cargo.Count == 0) { Message?.Invoke(Localization.Get(542), 0, HudMessageKind.Scan); return; }
+            int mx_value_item = -1;
+            int mx_value = -1;
+            List<int> items = new List<int>(0);
+            for (int i = 0; i < cargo.Count; i++) items.Add(cargo[i].item);
+            int[] prices = Shop.PriceList(db, Session.StationIndex, items);
             for (int i = 0; i < cargo.Count; i++)
-                if (cargo[i].amount > 0) { Message?.Invoke($"{cargo[i].amount}t {GameNames.Item(cargo[i].item)}", 0, HudMessageKind.Scan); return; }
+                if (cargo[i].amount > 0)
+                {
+                    if (cargo[i].amount * prices[i] > mx_value)
+                    {
+                        mx_value = cargo[i].amount * prices[i];
+                        mx_value_item = i;
+                    }
+                }
+            if (mx_value_item == -1) { Message?.Invoke(Localization.Get(542), 0, HudMessageKind.Scan); return; }
+            Message?.Invoke($"{cargo[mx_value_item].amount}t {GameNames.Item(cargo[mx_value_item].item)} ({mx_value}$)", 0, HudMessageKind.Scan); return;
         }
 
         /// <summary>TractorBeam::update's steal: KIPlayer::createCrate(0) at the ship, a container of its cargo, pulled at once:

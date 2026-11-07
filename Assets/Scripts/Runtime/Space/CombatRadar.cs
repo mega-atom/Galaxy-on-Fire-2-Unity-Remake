@@ -53,11 +53,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using GoF2Remake.Data;
 using GoF2Remake.World;
-using NUnit.Framework;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace GoF2Remake.Flight
